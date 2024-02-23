@@ -2,8 +2,17 @@ import type { Handle } from '@sveltejs/kit';
 import { isHttpError } from '@sveltejs/kit';
 import { createClient } from './api/usosClient';
 import { createDb } from './db/client';
+import { LRUCache } from 'lru-cache';
+import { usosService } from './services/usos';
+import type { GetProfile } from './services/usos/getProfile';
+
+const cache = new LRUCache<string, GetProfile>({
+	max: 1000,
+	ttl: 10 * 1000
+});
 
 export const handle: Handle = async ({ event, resolve }) => {
+	console.time('handle');
 	event.locals.db = createDb(event.fetch);
 
 	const tokens = {
@@ -19,14 +28,18 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (!isFailed) {
 		try {
 			usos = createClient(tokens);
-			profile = await usos.get<{
-				id: string;
-				student_number: string;
-				first_name: string;
-				last_name: string;
-			}>(
-				'users/user?fields=id|student_number|first_name|last_name|sex|student_status|staff_status|email|photo_urls|homepage_url'
-			);
+
+			const service = usosService(usos);
+
+			if (tokens.token && cache.has(tokens.token)) {
+				console.log('CACHE HIT');
+				profile = cache.get(tokens.token);
+			} else if (tokens.token) {
+				console.log('CACHE MISS');
+				profile = await service.getProfile();
+
+				cache.set(tokens.token, profile);
+			}
 		} catch (e) {
 			if (isHttpError(e)) {
 				isFailed = true;
@@ -45,6 +58,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 			path: '/'
 		});
 	}
+	console.timeEnd('handle');
 
 	const response = await resolve(event);
 

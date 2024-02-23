@@ -1,9 +1,7 @@
 <script>
 	import { page } from '$app/stores';
 
-	$: page.subscribe((value) => {
-		console.log(value.data);
-	});
+	$: page.subscribe((value) => {});
 </script>
 
 <div>
