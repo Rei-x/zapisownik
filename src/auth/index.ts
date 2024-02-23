@@ -47,12 +47,19 @@ export const getAccessToken = async (
 	};
 };
 
+const removeMultipleSlashesFromUrl = (url: string) => {
+	return url.replace(/([^:]\/)\/+/g, '$1');
+};
+
 // Function to get request token
 export async function getRequestToken() {
 	const data = oauth.authorize({
 		url: 'https://apps.usos.pwr.edu.pl/services/oauth/request_token',
 		method: 'POST',
-		data: { oauth_callback: `${ORIGIN}/callback`, scopes: 'studies' }
+		data: {
+			oauth_callback: removeMultipleSlashesFromUrl(`${ORIGIN}/callback`),
+			scopes: 'studies'
+		}
 	});
 
 	const response = await fetch(
