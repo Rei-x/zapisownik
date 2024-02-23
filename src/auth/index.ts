@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 
 import OAuth from 'oauth-1.0a';
-import { USOS_CONSUMER_KEY, USOS_CONSUMER_SECRET } from '$env/static/private';
+import { USOS_CONSUMER_KEY, USOS_CONSUMER_SECRET, ORIGIN } from '$env/static/private';
 export const oauth = new OAuth({
 	consumer: { key: USOS_CONSUMER_KEY, secret: USOS_CONSUMER_SECRET },
 	signature_method: 'HMAC-SHA1',
@@ -52,7 +52,7 @@ export async function getRequestToken() {
 	const data = oauth.authorize({
 		url: 'https://apps.usos.pwr.edu.pl/services/oauth/request_token',
 		method: 'POST',
-		data: { oauth_callback: 'http://localhost:5173/callback', scopes: 'studies' }
+		data: { oauth_callback: `${ORIGIN}/callback`, scopes: 'studies' }
 	});
 
 	const response = await fetch(
