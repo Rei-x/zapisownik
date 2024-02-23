@@ -17,7 +17,7 @@
 
 <section>
 	<Auth />
-	{#each data.cart as course}
+	{#each data.cart ?? [] as course}
 		<pre>{JSON.stringify(course, null, 2)}</pre>
 	{/each}
 	{#if data.profile}

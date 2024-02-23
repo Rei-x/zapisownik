@@ -4,11 +4,13 @@ import { usosService } from '../services/usos';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load = (async ({ locals }) => {
-	const usos = usosService(locals.client!);
-
 	return {
 		profile: locals.profile,
-		cart: (await usos.getUserRegistrations()).filter((p) => p.description.pl.includes("IST"))
+		cart: locals.client
+			? (await usosService(locals.client).getUserRegistrations()).filter((p) =>
+					p.description.pl.includes('IST')
+				)
+			: null
 	};
 }) satisfies PageServerLoad;
 
