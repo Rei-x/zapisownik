@@ -2,13 +2,29 @@ import type { Handle } from '@sveltejs/kit';
 import { isHttpError } from '@sveltejs/kit';
 import { createClient } from './api/usosClient';
 import { createDb } from './db/client';
-import { LRUCache } from 'lru-cache';
 import { usosService } from './services/usos';
-import type { GetProfile } from './services/usos/getProfile';
+import { Cache } from 'file-system-cache';
+import { createStaleWhileRevalidateCache } from 'stale-while-revalidate-cache';
 
-const cache = new LRUCache<string, GetProfile>({
-	max: 1000,
-	ttl: 10 * 1000
+const cache = new Cache({
+	ttl: 120
+});
+const swr = createStaleWhileRevalidateCache({
+	storage: {
+		getItem(key) {
+			return cache.get(key);
+		},
+		setItem(key, value) {
+			cache.set(key, value as undefined);
+		},
+		removeItem(key) {
+			cache.remove(key);
+		}
+	},
+	minTimeToStale: 60000,
+	maxTimeToLive: 600000,
+	serialize: JSON.stringify,
+	deserialize: JSON.parse
 });
 
 export const handle: Handle = async ({ event, resolve }) => {
@@ -30,16 +46,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 			usos = createClient(tokens);
 
 			const service = usosService(usos);
-
-			if (tokens.token && cache.has(tokens.token)) {
-				console.log('CACHE HIT');
-				profile = cache.get(tokens.token);
-			} else if (tokens.token) {
-				console.log('CACHE MISS');
-				profile = await service.getProfile();
-
-				cache.set(tokens.token, profile);
-			}
+			console.time('swr');
+			const response = await swr('profile', () => service.getProfile());
+			console.timeEnd('swr');
+			profile = response.value;
 		} catch (e) {
 			if (isHttpError(e)) {
 				isFailed = true;

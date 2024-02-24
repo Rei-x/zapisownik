@@ -56,10 +56,12 @@
     "@auth/sveltekit": "^0.13.0",
     "@libsql/client": "^0.5.0",
     "drizzle-orm": "^0.29.3",
+    "file-system-cache": "^2.4.4",
     "libsql": "^0.3.1",
     "lru-cache": "^10.2.0",
     "oauth-1.0a": "^2.2.6",
     "pocketbase": "^0.21.1",
+    "stale-while-revalidate-cache": "^3.3.0",
     "uuid": "^9.0.1"
   }
 }

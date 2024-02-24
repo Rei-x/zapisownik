@@ -41,6 +41,7 @@ interface Description {
 export const usosService = (usosClient: UsosClient) => {
 	return {
 		getProfile: async () => {
+			console.log('calll');
 			return await usosClient.get<GetProfile>(
 				'users/user?fields=id|student_number|first_name|last_name|sex|student_status|staff_status|email|photo_urls|homepage_url'
 			);
