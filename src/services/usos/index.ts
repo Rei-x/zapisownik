@@ -97,6 +97,20 @@ export const usosService = (usosClient: UsosClient) => {
 
 			return data;
 		},
+		getCourse: async (courseId: string) => {
+			const data = await fetchWithCookie(
+				`https://web.usos.pwr.edu.pl/kontroler.php?_action=katalog2/przedmioty/pokazPrzedmiot&prz_kod=${courseId}`
+			);
+
+			const $ = cheerio.load(await data.text());
+
+			const name = $('h1').text();
+
+			return {
+				id: courseId,
+				name
+			};
+		},
 		getGroups: async (courseId: string, term?: string) => {
 			const data = await fetchWithCookie(
 				`https://web.usos.pwr.edu.pl/kontroler.php?_action=katalog2/przedmioty/pokazPlanZajecPrzedmiotu&prz_kod=${courseId}&plan_division=semester&plan_format=new-ui${term ? `&cdyd_kod=${term}` : ''}`,
@@ -117,6 +131,7 @@ export const usosService = (usosClient: UsosClient) => {
 					}
 				}
 			).then((t) => t.text());
+
 			const $ = cheerio.load(data);
 
 			const entries = $('timetable-entry').toArray();
@@ -203,6 +218,7 @@ export const usosService = (usosClient: UsosClient) => {
 					courseId,
 					type,
 					nameExtended,
+					groupNumber: Number(nameExtended.split(', ').at(1)?.split(' ').at(1)),
 					frequency,
 					name
 				};

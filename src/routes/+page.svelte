@@ -46,7 +46,14 @@
 	<Auth />
 	<div class="container mx-auto flex">
 		<div>
-			<RadioGroup.Root bind:value={$planStore.selectedRoundId} class="gap-4">
+			<RadioGroup.Root
+				value={$planStore.selectedRoundId}
+				onValueChange={(v) => {
+					$planStore.coursesIds = [];
+					$planStore.selectedRoundId = v;
+				}}
+				class="gap-4"
+			>
 				{#each registrations as course}
 					<div class="flex items-center space-x-2">
 						<RadioGroup.Item value={course.id} id={course.id} />
@@ -103,11 +110,14 @@
 						.filter((c) => day.toLowerCase().includes(c.day))
 						.map((c) => ({
 							code: c.courseId,
+							day: c.day,
+							frequency: c.frequency,
 							duration: c.duration.hours * 60 + c.duration.minutes,
 							lecturer: c.person,
 							lectureType: c.type,
-							name: c.name,
-							selectionType: 'active',
+							groupNumber: c.groupNumber,
+							name: c.course.name,
+							selectionType: 'off',
 							startHour: c.hourStartTime.hours,
 							startMinute: c.hourStartTime.minutes,
 							type:
@@ -116,12 +126,7 @@
 									: c.frequency === Frequency.ODD
 										? 'TN | '
 										: '') +
-									c.type ===
-								LessonType.LABORATORY
-									? 'L'
-									: c.type === LessonType.LECTURE
-										? 'W'
-										: 'C'
+								(c.type === LessonType.LABORATORY ? 'L' : c.type === LessonType.LECTURE ? 'W' : 'C')
 						}))}
 				/>
 			{/each}

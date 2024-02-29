@@ -1,5 +1,6 @@
 import type { Context } from '$lib/trpc/context';
 import { TRPCError, initTRPC } from '@trpc/server';
+import assert from 'assert';
 import { z } from 'zod';
 
 export const t = initTRPC.context<Context>().create();
@@ -38,9 +39,26 @@ export const router = t.router({
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			return Promise.all(
-				input.coursesIds.map(async (courseId) => ctx.client.getGroups(courseId))
-			).then((data) => data.flat());
+			const [groups, courses] = await Promise.all([
+				Promise.all(input.coursesIds.map(async (courseId) => ctx.client.getGroups(courseId))).then(
+					(data) => data.flat()
+				),
+				Promise.all(
+					Array.from(new Set(input.coursesIds)).map(async (courseId) =>
+						ctx.client.getCourse(courseId)
+					)
+				)
+			]);
+
+			return groups.map((group) => {
+				const course = courses.find((course) => course.id === group.courseId);
+
+				assert(course);
+				return {
+					...group,
+					course
+				};
+			});
 		})
 });
 
