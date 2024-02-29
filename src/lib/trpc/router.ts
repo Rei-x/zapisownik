@@ -20,9 +20,6 @@ const protectedRoute = t.procedure.use(async ({ ctx, next }) => {
 });
 
 export const router = t.router({
-	greeting: protectedRoute.query(async () => {
-		return `Hello tRPC v10 @ ${new Date().toLocaleTimeString()}`;
-	}),
 	courses: protectedRoute
 		.input(
 			z.object({
@@ -32,63 +29,18 @@ export const router = t.router({
 		.query(async ({ input, ctx }) => {
 			const data = await ctx.client?.getRegistrationRoundCourses(input.cartId);
 
-			return data.sort((a, b) => b.registrations_count - a.registrations_count);
+			return data.sort((a, b) => a.course.name.pl.localeCompare(b.course.name.pl));
 		}),
-	coursesEditions: protectedRoute
-		.input(
-			z.object({
-				courseId: z.string(),
-				termId: z.string()
-			})
-		)
-		.query(async ({ input, ctx }) => {
-			const data = await ctx.client?.getCourseEditions(input.courseId, input.termId);
-
-			return data;
-		}),
-	courseUnit: protectedRoute
-		.input(
-			z.object({
-				courseUnitId: z.string()
-			})
-		)
-		.query(async ({ input, ctx }) => {
-			const data = await ctx.client?.getCourseUnitWithGroups('65726');
-
-			return data;
-		}),
-	cart: protectedRoute.query(async ({ ctx }) => {
-		const data = await ctx.client?.getCoursesCarts();
-
-		return data;
-	}),
-	userCoures: protectedRoute.query(async ({ ctx }) => {
-		const data = await ctx.client?.getUserCourses();
-
-		return data;
-	}),
-	tt: t.router({
-		classgroup: protectedRoute.query(async ({ ctx }) => {
-			return ctx.client.getClassGroupTimetable('65726', '1');
-		})
-	}),
-	meeting: protectedRoute
-		.input(
-			z.object({
-				meetingId: z.number()
-			})
-		)
-		.query(async ({ ctx, input }) => {
-			return ctx.client.getMeetingDate(input.meetingId.toString());
-		}),
-	getCourses: protectedRoute
+	getGroups: protectedRoute
 		.input(
 			z.object({
 				coursesIds: z.array(z.string())
 			})
 		)
 		.query(async ({ ctx, input }) => {
-			return Promise.all(input.coursesIds.map(async (courseId) => ctx.client.getGroups(courseId)));
+			return Promise.all(
+				input.coursesIds.map(async (courseId) => ctx.client.getGroups(courseId))
+			).then((data) => data.flat());
 		})
 });
 

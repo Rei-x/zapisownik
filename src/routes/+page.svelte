@@ -6,12 +6,14 @@
 	import { Label } from '$lib/components/ui/label';
 	import { trpc } from '$lib/trpc/client';
 	import { Checkbox } from '$lib/components/ui/checkbox';
+	import DayPlan from '$lib/components/DayPlan.svelte';
+	import { planStore } from './store';
+	import { Frequency, LessonType } from '../services/usos/types';
 	export let data: PageData;
 
 	const registrations =
 		data.cart?.reduce(
 			(acc, course) => {
-				// remove duplicates basedon course.id
 				if (!acc.find((c) => c.description.pl === course.description.pl)) {
 					return [...acc, course];
 				}
@@ -21,20 +23,18 @@
 			[] as typeof data.cart
 		) ?? [];
 
-	let selectedRegistration = '';
-
 	$: roundId = registrations
-		.find((course) => course.id === selectedRegistration)
+		.find((course) => course.id === $planStore.selectedRoundId)
 		?.rounds?.at(0)?.id;
 
-	$: response = trpc($page).courses.createQuery(
+	$: courses = trpc($page).courses.createQuery(
 		{ cartId: roundId ?? '' },
 		{
 			enabled: roundId !== undefined
 		}
 	);
 
-	let selectedCourses = [] as string[];
+	$: groups = trpc($page).getGroups.createQuery({ coursesIds: $planStore.coursesIds });
 </script>
 
 <svelte:head>
@@ -44,9 +44,9 @@
 
 <section>
 	<Auth />
-	<div class="flex">
+	<div class="container mx-auto flex">
 		<div>
-			<RadioGroup.Root bind:value={selectedRegistration} class="gap-4">
+			<RadioGroup.Root bind:value={$planStore.selectedRoundId} class="gap-4">
 				{#each registrations as course}
 					<div class="flex items-center space-x-2">
 						<RadioGroup.Item value={course.id} id={course.id} />
@@ -56,16 +56,19 @@
 			</RadioGroup.Root>
 		</div>
 		<ul class="flex flex-col gap-4">
-			{#if $response.data}
-				{#each $response.data as course}
+			{#if $courses.data}
+				{#each $courses.data as course}
 					<li class="flex items-center space-x-2">
 						<Checkbox
 							id={course.course.id}
+							checked={$planStore.coursesIds.includes(course.course.id)}
 							onCheckedChange={(isChecked) => {
 								if (isChecked) {
-									selectedCourses = [...selectedCourses, course.course.id];
+									$planStore.coursesIds = [...$planStore.coursesIds, course.course.id];
 								} else {
-									selectedCourses = selectedCourses.filter((id) => id !== course.course.id);
+									$planStore.coursesIds = $planStore.coursesIds.filter(
+										(id) => id !== course.course.id
+									);
 								}
 							}}
 							aria-labelledby={`${course.course.id}-terms-label`}
@@ -79,12 +82,49 @@
 						</Label>
 					</li>
 				{/each}
-			{:else if $response.isLoading}
+			{:else if $courses.isLoading}
 				<p>Loading...</p>
 			{/if}
 		</ul>
-		{#if selectedCourses.length > 0}
-			{selectedCourses.join(', ')}
+	</div>
+	<div class="mx-10 flex flex-col">
+		{#if $groups.isLoading}
+			<p>Loading...</p>
+		{:else if $groups.error}
+			<p>Error: {$groups.error.message}</p>
+		{:else if $groups.data && $groups.data?.length === 0}
+			<p>No groups found</p>
+		{/if}
+		{#if $groups.data && $groups.data?.length > 0}
+			{#each ['Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek'] as day}
+				<DayPlan
+					title={day}
+					courses={$groups.data
+						.filter((c) => day.toLowerCase().includes(c.day))
+						.map((c) => ({
+							code: c.courseId,
+							duration: c.duration.hours * 60 + c.duration.minutes,
+							lecturer: c.person,
+							lectureType: c.type,
+							name: c.name,
+							selectionType: 'active',
+							startHour: c.hourStartTime.hours,
+							startMinute: c.hourStartTime.minutes,
+							type:
+								(c.frequency === Frequency.EVEN
+									? 'TP | '
+									: c.frequency === Frequency.ODD
+										? 'TN | '
+										: '') +
+									c.type ===
+								LessonType.LABORATORY
+									? 'L'
+									: c.type === LessonType.LECTURE
+										? 'W'
+										: 'C'
+						}))}
+				/>
+			{/each}
 		{/if}
 	</div>
 </section>

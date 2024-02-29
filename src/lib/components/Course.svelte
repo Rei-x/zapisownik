@@ -1,14 +1,23 @@
-<script lang="ts">
-	export let code: string;
-	export let type: string;
-	export let name: string;
-	export let startHour: number;
-	export let startMinute: number;
-	export let duration: number;
-	export let lecturer: string;
+<script lang="ts" context="module">
+	export interface CourseData {
+		code: string;
+		type: string;
+		name: string;
+		startHour: number;
+		startMinute: number;
+		duration: number;
+		lecturer: string;
+		lectureType: 'wyklad' | 'cwiczenia' | 'laboratorium' | 'projekt' | 'seminarium';
+		selectionType: 'off' | 'active';
+	}
+</script>
 
-	export let lectureType: 'wyklad' | 'cwiczenia' | 'laborki' | 'projekt' | 'seminarium' = 'wyklad';
-	export let selectionType: 'off' | 'active' = 'off';
+<script lang="ts">
+	export let data: CourseData;
+
+	let { startHour, startMinute, duration, lectureType, selectionType, code, name, lecturer, type } =
+		data;
+
 	$: startGrid = startHour * 12 - 7 * 12 - 5 + startMinute / 5;
 	$: gridSize = duration / 5;
 </script>
@@ -104,19 +113,19 @@
 	.cwiczenia.active .lecture {
 		color: #4aab3c;
 	}
-	.laborki {
+	.laboratorium {
 		background: #c2e1ff;
 	}
-	.laborki .type,
-	.laborki .lecture {
+	.laboratorium .type,
+	.laboratorium .lecture {
 		color: #6c95bd;
 	}
-	.laborki.active {
+	.laboratorium.active {
 		background: #73b9ff;
 		border: 2px solid #006dd9;
 	}
-	.laborki.active .type,
-	.laborki.active .lecture {
+	.laboratorium.active .type,
+	.laboratorium.active .lecture {
 		color: #336494;
 	}
 	.projekt {

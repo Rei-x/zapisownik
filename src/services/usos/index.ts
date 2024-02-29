@@ -7,26 +7,9 @@ import type { GetRegistrationRoundCourses } from './getRegistrationRoundCourses'
 import type { GetUserRegistrations } from './getUserRegistrations';
 import * as cheerio from 'cheerio';
 import makeFetchCookie from 'fetch-cookie';
+import { Frequency, Day, LessonType } from './types';
 
 const fetchWithCookie = makeFetchCookie(fetch);
-
-enum Frequency {
-	EVERY = 'każd',
-	ODD = 'nieparzyst',
-	EVEN = 'parzyst',
-	NEVER = 'NEVER'
-}
-
-enum Day {
-	MONDAY = 'poniedzi',
-	TUESDAY = 'wtor',
-	WEDNESDAY = 'środ',
-	THURSDAY = 'czwart',
-	FRIDAY = 'piąt',
-	SATURDAY = 'sobot',
-	SUNDAY = 'niedziel',
-	NEVER = 'NEVER'
-}
 
 const hourToTime = (hour: string) => {
 	const [hours, minutes] = hour.split(':').map(Number);
@@ -193,6 +176,22 @@ export const usosService = (usosClient: UsosClient) => {
 				const hourStartTime = hourToTime(hourStart);
 				const hourEndTime = hourToTime(hourEnd);
 
+				const type = (() => {
+					switch (true) {
+						case name.startsWith('C'):
+							return LessonType.EXERCISES;
+						case name.startsWith('L'):
+							return LessonType.LABORATORY;
+						case name.startsWith('P'):
+							return LessonType.PROJECT;
+						case name.startsWith('S'):
+							return LessonType.SEMINAR;
+						case name.startsWith('W'):
+							return LessonType.LECTURE;
+						default:
+							return LessonType.LECTURE;
+					}
+				})();
 				return {
 					hourStartTime,
 					hourEndTime,
@@ -201,6 +200,8 @@ export const usosService = (usosClient: UsosClient) => {
 					personLink,
 					groupLink,
 					day,
+					courseId,
+					type,
 					nameExtended,
 					frequency,
 					name
