@@ -58,7 +58,7 @@ export async function getRequestToken() {
 		method: 'POST',
 		data: {
 			oauth_callback: removeMultipleSlashesFromUrl(`${ORIGIN}/callback`),
-			scopes: 'studies'
+			scopes: 'studies|offline_access'
 		}
 	});
 

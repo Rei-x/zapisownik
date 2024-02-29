@@ -50,10 +50,10 @@
 			class="day-hours-container grid grid-cols-dayPlan rounded-t-xl border-2 border-solid border-slate-100 px-[10px]"
 		>
 			{#each topHours as hour}
-				<Hour {hour} type="top" />
+				<Hour {hour} />
 			{/each}
 			{#each bottomHours as hour}
-				<Hour {hour} type="bottom" />
+				<Hour {hour} />
 			{/each}
 		</div>
 		<div
