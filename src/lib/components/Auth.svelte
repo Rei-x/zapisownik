@@ -1,12 +1,8 @@
 <script>
 	import { page } from '$app/stores';
+	import { buttonVariants } from './ui/button';
 
 	$: page.subscribe((value) => {});
 </script>
 
-<div>
-	<h1>SvelteKit Auth Example</h1>
-	<p>
-		<a href="/signin"> Sign in </a>
-	</p>
-</div>
+<a href="/signin" class={buttonVariants({ variant: 'outline' })}>Zaloguj się</a>

@@ -1,13 +1,15 @@
-<script>
+<script lang="ts">
 	import '../app.pcss';
-	import '../app.pcss';
-	import Header from './Header.svelte';
+	import { QueryClientProvider } from '@tanstack/svelte-query';
+	import type { LayoutData } from './$types';
+
+	export let data: LayoutData;
 </script>
 
-<div class="app">
-	<Header></Header>
-
-	<main class="container mx-auto">
-		<slot />
-	</main>
-</div>
+<QueryClientProvider client={data.queryClient}>
+	<div class="app">
+		<main class="container mx-auto">
+			<slot />
+		</main>
+	</div>
+</QueryClientProvider>

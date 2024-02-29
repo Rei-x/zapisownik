@@ -3,32 +3,12 @@ import { isHttpError } from '@sveltejs/kit';
 import { createClient } from './api/usosClient';
 import { createDb } from './db/client';
 import { usosService } from './services/usos';
-import { Cache } from 'file-system-cache';
-import { createStaleWhileRevalidateCache } from 'stale-while-revalidate-cache';
+import { createContext } from '$lib/trpc/context';
+import { router } from '$lib/trpc/router';
+import { createTRPCHandle } from 'trpc-sveltekit';
+import { sequence } from '@sveltejs/kit/hooks';
 
-const cache = new Cache({
-	ttl: 120
-});
-const swr = createStaleWhileRevalidateCache({
-	storage: {
-		getItem(key) {
-			return cache.get(key);
-		},
-		setItem(key, value) {
-			cache.set(key, value as undefined);
-		},
-		removeItem(key) {
-			cache.remove(key);
-		}
-	},
-	minTimeToStale: 60000,
-	maxTimeToLive: 600000,
-	serialize: JSON.stringify,
-	deserialize: JSON.parse
-});
-
-export const handle: Handle = async ({ event, resolve }) => {
-	console.time('handle');
+const usosAuth: Handle = async ({ event, resolve }) => {
 	event.locals.db = createDb(event.fetch);
 
 	const tokens = {
@@ -44,12 +24,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 	if (!isFailed) {
 		try {
 			usos = createClient(tokens);
+			profile = await usosService(usos).getProfile();
 
-			const service = usosService(usos);
-			console.time('swr');
-			const response = await swr('profile', () => service.getProfile());
-			console.timeEnd('swr');
-			profile = response.value;
+		
 		} catch (e) {
 			if (isHttpError(e)) {
 				isFailed = true;
@@ -68,9 +45,12 @@ export const handle: Handle = async ({ event, resolve }) => {
 			path: '/'
 		});
 	}
-	console.timeEnd('handle');
 
 	const response = await resolve(event);
 
 	return response;
 };
+
+const trpc: Handle = createTRPCHandle({ router, createContext });
+
+export const handle = sequence(usosAuth, trpc);

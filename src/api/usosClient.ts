@@ -35,12 +35,13 @@ export const createClient = ({
 					Authorization: oauth.toHeader(data).Authorization
 				}
 			});
+
 			if (response.status === 401) {
 				throw error(401, "You're not authorized to access this resource");
 			}
 
 			if (!response.ok) {
-				console.log('Not ok', response.statusText);
+				console.log('Not ok', await response.text());
 				throw error(500);
 			}
 
