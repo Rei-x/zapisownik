@@ -10,7 +10,6 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
-		"gen": "pocketbase-typegen --db ./pb_data/data.db --out pocketbase-types.ts",
 		"format": "prettier --write .",
 		"test:integration": "playwright test",
 		"test:unit": "vitest"

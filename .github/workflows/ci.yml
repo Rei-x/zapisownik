@@ -1,0 +1,29 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+
+jobs:
+  Lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      USOS_CONSUMER_KEY: '123'
+      USOS_CONSUMER_SECRET: '123'
+      ORIGIN: 'https://example.com'
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+      - name: install
+        run: bun install
+      - name: type check
+        run: bun check
+      - name: lint
+        if: (${{ success() }} || ${{ failure() }}) # ensures this step runs even if previous steps fail (avoids multiple runs uncovering different issues at different steps)
+        run: bun lint
+      - name: build and check generated types
+        if: (${{ success() }} || ${{ failure() }}) # ensures this step runs even if previous steps fail
+        run: bun run build
