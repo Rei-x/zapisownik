@@ -1,6 +1,5 @@
 <script>
 	import { page } from '$app/stores';
-	import { buttonVariants } from './ui/button';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 </script>

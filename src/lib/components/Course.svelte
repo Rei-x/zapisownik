@@ -15,8 +15,6 @@
 </script>
 
 <script lang="ts">
-	import deepEqual from 'deep-equal';
-
 	import { planStore } from '../../routes/store';
 	import { Frequency } from '../../services/usos/types';
 	import { cn } from '$lib/utils';
