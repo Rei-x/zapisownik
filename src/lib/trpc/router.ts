@@ -32,6 +32,9 @@ export const router = t.router({
 
 			return data.sort((a, b) => a.course.name.pl.localeCompare(b.course.name.pl));
 		}),
+	me: protectedRoute.query(async ({ ctx }) => {
+		return ctx.client.getProfile();
+	}),
 	getGroups: protectedRoute
 		.input(
 			z.object({

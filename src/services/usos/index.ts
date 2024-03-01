@@ -1,4 +1,4 @@
-import type { UsosClient } from '../../api/usosClient';
+import type { UsosClient } from './usosClient';
 import type { GetCoursesCart } from './getCoursesCart';
 import type { GetCoursesEditions } from './getCoursesEditions';
 
@@ -8,6 +8,8 @@ import type { GetUserRegistrations } from './getUserRegistrations';
 import * as cheerio from 'cheerio';
 import makeFetchCookie from 'fetch-cookie';
 import { Frequency, Day, LessonType } from './types';
+
+import { type GetTerms } from './getTerms';
 
 const fetchWithCookie = makeFetchCookie(fetch);
 
@@ -68,7 +70,7 @@ export const usosService = (usosClient: UsosClient) => {
 		},
 		getCourseEditions: async (courseId: string, termId: string) => {
 			const data = await usosClient.get<GetCoursesEditions>(
-				`courses/course_edition?course_id=${courseId}&term_id=${termId}&fields=course_id|course_name|term_id|user_groups|course_units_ids|attributes`
+				`courses/course_edition2?course_id=${courseId}&term_id=${termId}&fields=course_units`
 			);
 
 			return data;
@@ -97,6 +99,11 @@ export const usosService = (usosClient: UsosClient) => {
 
 			return data;
 		},
+		getTerms: async () => {
+			const data = await usosClient.get<GetTerms>('terms/terms_index');
+
+			return data;
+		},
 		getCourse: async (courseId: string) => {
 			const data = await fetchWithCookie(
 				`https://web.usos.pwr.edu.pl/kontroler.php?_action=katalog2/przedmioty/pokazPrzedmiot&prz_kod=${courseId}`
@@ -111,23 +118,14 @@ export const usosService = (usosClient: UsosClient) => {
 				name
 			};
 		},
+
 		getGroups: async (courseId: string, term?: string) => {
 			const data = await fetchWithCookie(
 				`https://web.usos.pwr.edu.pl/kontroler.php?_action=katalog2/przedmioty/pokazPlanZajecPrzedmiotu&prz_kod=${courseId}&plan_division=semester&plan_format=new-ui${term ? `&cdyd_kod=${term}` : ''}`,
 				{
 					headers: {
-						'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:123.0) Gecko/20100101 Firefox/123.0',
 						Accept:
-							'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-						'Accept-Language': 'en-US,en;q=0.5',
-						'Sec-GPC': '1',
-						'Upgrade-Insecure-Requests': '1',
-						'Sec-Fetch-Dest': 'document',
-						'Sec-Fetch-Mode': 'navigate',
-						'Sec-Fetch-Site': 'none',
-						'Sec-Fetch-User': '?1',
-						Pragma: 'no-cache',
-						'Cache-Control': 'no-cache'
+							'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8'
 					}
 				}
 			).then((t) => t.text());

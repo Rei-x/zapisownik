@@ -19,7 +19,6 @@
 
 	import { planStore } from '../../routes/store';
 	import { Frequency } from '../../services/usos/types';
-	import clsx from 'clsx';
 	import { cn } from '$lib/utils';
 
 	export let data: CourseData;
@@ -44,10 +43,18 @@
 		const endHour2 = course2.startHour + Math.floor(course2.duration / 60);
 		const endMinute2 = course2.startMinute + (course2.duration % 60);
 
-		if (course1.startHour < endHour2 && endHour1 > course2.startHour) {
-			if (course1.startMinute < endMinute2 && endMinute1 > course2.startMinute) {
-				return true;
-			}
+		const startDate1 = new Date(0, 0, 0, course1.startHour, course1.startMinute);
+		const endDate1 = new Date(0, 0, 0, endHour1, endMinute1);
+
+		const startDate2 = new Date(0, 0, 0, course2.startHour, course2.startMinute);
+		const endDate2 = new Date(0, 0, 0, endHour2, endMinute2);
+
+		if (startDate1 <= endDate2 && endDate1 >= startDate2) {
+			return true;
+		}
+
+		if (startDate2 <= endDate1 && endDate2 >= startDate1) {
+			return true;
 		}
 
 		return false;
@@ -55,9 +62,12 @@
 
 	let { startHour, startMinute, duration, lectureType, code, name, lecturer, type } = data;
 
-	$: activeType = $planStore.selectedGroups.find((c) => deepEqual(c, data))
+	$: activeType = $planStore.selectedGroups.find(
+		(c) => c.code === code && c.lectureType === lectureType && c.groupNumber === data.groupNumber
+	)
 		? 'active'
-		: $planStore.selectedGroups.find((c) => isOverlapping(data, c))
+		: $planStore.selectedGroups.find((c) => isOverlapping(data, c)) ||
+			  $planStore.selectedGroups.find((c) => c.code === code && c.lectureType === lectureType)
 			? 'off'
 			: '';
 
@@ -86,12 +96,17 @@
 	on:click={() => {
 		if (activeType === 'active') {
 			$planStore.selectedGroups = $planStore.selectedGroups.filter(
-				(group) => !deepEqual(group, data)
+				(group) =>
+					!(
+						group.code === code &&
+						group.lectureType === lectureType &&
+						group.groupNumber === data.groupNumber
+					)
 			);
 		} else {
-			$planStore.selectedGroups = $planStore.selectedGroups.filter(
-				(group) => !isOverlapping(data, group)
-			);
+			$planStore.selectedGroups = $planStore.selectedGroups
+				.filter((group) => !isOverlapping(data, group))
+				.filter((group) => group.code !== code || group.lectureType !== lectureType);
 			$planStore.selectedGroups = $planStore.selectedGroups = [...$planStore.selectedGroups, data];
 		}
 	}}
@@ -99,6 +114,7 @@
 	<div class="lesson-content p-2">
 		<div class="flex justify-between">
 			<p class="font-semibold">{type}</p>
+			<p class="text-sm text-gray-700">Grupa {data.groupNumber}</p>
 		</div>
 		<p class="py-2 text-sm font-light">{name}</p>
 		<p

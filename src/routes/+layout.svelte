@@ -7,8 +7,8 @@
 </script>
 
 <QueryClientProvider client={data.queryClient}>
-	<div class="app">
-		<main class="mx-auto">
+	<div class="app h-screen">
+		<main class="mx-auto h-full">
 			<slot />
 		</main>
 	</div>

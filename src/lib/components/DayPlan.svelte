@@ -43,11 +43,11 @@
 	];
 </script>
 
-<div class="day-container mb-10 w-full">
+<div class="mb-10 w-full">
 	<h3 class="day-title mb-3 text-2xl font-bold">{title}</h3>
-	<div class="day overflow-hidden">
+	<div class="day overflow-scroll md:overflow-hidden">
 		<div
-			class="day-hours-container grid grid-cols-dayPlan rounded-t-xl border-2 border-solid border-slate-100 px-[10px]"
+			class="day-hours-container grid min-w-[1200px] grid-cols-dayPlan rounded-t-xl border-2 border-solid border-slate-100 px-[10px]"
 		>
 			{#each topHours as hour}
 				<Hour {hour} />
@@ -57,7 +57,7 @@
 			{/each}
 		</div>
 		<div
-			class="grid min-h-[100px] grid-flow-col grid-cols-dayPlan gap-y-2.5 rounded-b-md border-2 border-t-0 border-gray-200 bg-white px-[10px] py-5"
+			class="grid min-h-[100px] min-w-[1200px] grid-flow-col grid-cols-dayPlan gap-y-2.5 rounded-b-md border-2 border-t-0 border-gray-200 bg-white px-[10px] py-5"
 		>
 			{#each courses as course}
 				<Course data={course} />

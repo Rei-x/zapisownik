@@ -3,7 +3,7 @@ import { fontFamily } from 'tailwindcss/defaultTheme';
 /** @type {import('tailwindcss').Config} */
 const config = {
 	darkMode: ['class'],
-	content: ['./src/**/*.{html,js,svelte,ts}'],
+	content: ['./src/**/*.{html,js,svelte,ts}', './node_modules/svelte-ux/**/*.{svelte,js}'],
 	safelist: ['dark'],
 	theme: {
 		container: {
@@ -14,6 +14,14 @@ const config = {
 			}
 		},
 		extend: {
+			animation: {
+				gradient: 'gradient 3s linear infinite'
+			},
+			keyframes: {
+				gradient: {
+					to: { 'background-position': '-200% center' }
+				}
+			},
 			colors: {
 				border: 'hsl(var(--border) / <alpha-value>)',
 				input: 'hsl(var(--input) / <alpha-value>)',

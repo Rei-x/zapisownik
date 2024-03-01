@@ -1,7 +1,7 @@
 import type { RequestEvent } from '@sveltejs/kit';
 import type { inferAsyncReturnType } from '@trpc/server';
 import { usosService } from '../../services/usos';
-import { createClient } from '../../api/usosClient';
+import { createClient } from '../../services/usos/usosClient';
 
 export async function createContext(event: RequestEvent) {
 	const tokens = {

@@ -1,5 +1,5 @@
 import { error, fail } from '@sveltejs/kit';
-import { oauth } from '../auth';
+import { oauth } from '../../auth';
 
 const baseUrl = 'https://apps.usos.pwr.edu.pl/services';
 

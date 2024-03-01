@@ -1,6 +1,6 @@
 // See https://kit.svelte.dev/docs/types#app
 
-import type { createClient } from './api/usosClient';
+import type { createClient } from './services/usos/usosClient';
 
 // for information about these interfaces
 declare global {
@@ -14,10 +14,15 @@ declare global {
 				first_name: string;
 				last_name: string;
 			};
-
-			db: ReturnType<typeof import('./db/client').createDb>;
 		}
-		// interface PageData {}
+		interface PageData {
+			profile?: {
+				id: string;
+				student_number: string;
+				first_name: string;
+				last_name: string;
+			};
+		}
 		// interface PageState {}
 		// interface Platform {}
 	}
