@@ -8,7 +8,7 @@
 	{#if $page.data.profile}
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger asChild let:builder>
-				<Button builders={[builder]} variant="outline">Bartosz</Button>
+				<Button builders={[builder]} variant="outline">{$page.data.profile.first_name}</Button>
 			</DropdownMenu.Trigger>
 			<DropdownMenu.Content class="w-56">
 				<DropdownMenu.Label>Moje konto</DropdownMenu.Label>
