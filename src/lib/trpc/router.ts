@@ -1,6 +1,5 @@
 import type { Context } from '$lib/trpc/context';
 import { TRPCError, initTRPC } from '@trpc/server';
-import assert from 'assert';
 import { z } from 'zod';
 
 export const t = initTRPC.context<Context>().create();
@@ -56,7 +55,11 @@ export const router = t.router({
 			return groups.map((group) => {
 				const course = courses.find((course) => course.id === group.courseId);
 
-				assert(course);
+				if (!course) {
+					throw new TRPCError({
+						code: 'INTERNAL_SERVER_ERROR'
+					});
+				}
 				return {
 					...group,
 					course
