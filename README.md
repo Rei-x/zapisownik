@@ -2,7 +2,7 @@
     <h1 align="center">ZAPISOWNIK</h1>
 </p>
 <p align="center">
-	<!-- Tarcze Shields.io nie są używane z ikonami umiejętności. --><p>
+<p>
 <p align="center">
 	<a href="https://skillicons.dev">
 		<img src="https://skillicons.dev/icons?i=html,js,md,svelte,ts,vite">
